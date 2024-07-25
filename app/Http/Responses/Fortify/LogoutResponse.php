@@ -2,7 +2,6 @@
 
 namespace App\Http\Responses\Fortify;
 
-
 use Illuminate\Support\Facades\Cookie;
 use Laravel\Fortify\Fortify;
 
