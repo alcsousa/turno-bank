@@ -11,21 +11,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\LogoutResponse;
+use Laravel\Fortify\Contracts\RegisterResponse;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->instance(
+            LoginResponse::class,
+            new \App\Http\Responses\Fortify\LoginResponse()
+        );
+
+        $this->app->instance(
+            RegisterResponse::class,
+            new \App\Http\Responses\Fortify\RegisterResponse()
+        );
+
+        $this->app->instance(
+            LogoutResponse::class,
+            new \App\Http\Responses\Fortify\LogoutResponse()
+        );
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         Fortify::createUsersUsing(CreateNewUser::class);
