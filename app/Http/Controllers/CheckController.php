@@ -17,6 +17,7 @@ class CheckController extends Controller
     {
         $checks = Check::with('status')
             ->where('user_id', '=', $request->user()->id)
+            ->orderBy('id', 'desc')
             ->paginate();
 
         return response()->json(new CheckCollection($checks), Response::HTTP_OK);
