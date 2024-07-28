@@ -17,6 +17,6 @@ class DepositCheckAction
             'amount' => $checkData['amount'],
             'description' => $checkData['description'],
             'image_path' => $imagePath
-        ]);
+        ])->load('status')->refresh();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses\Fortify;
 
-use App\Http\Resources\UserResource;
+use App\Http\Resources\User\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Laravel\Fortify\Fortify;

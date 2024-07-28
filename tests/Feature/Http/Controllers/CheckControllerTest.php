@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Models\Check;
 use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
@@ -10,34 +11,108 @@ use Tests\TestCase;
 
 class CheckControllerTest extends TestCase
 {
-    private array $checkJsonStructure = [
-        'id',
-        'amount',
-        'description',
-        'image_path',
-        'is_approved',
-        'reviewed_at'
-    ];
-
     public function test_a_check_can_be_stored_and_returns_http_created()
     {
-        $user = User::factory()->create();
-        $this->be($user);
-
+        // Given a valid user and payload
         Storage::fake();
         $fakeFile = UploadedFile::fake()->image('test.jpg');
+        $user = User::factory()->create();
         $payload = [
             'amount' => '100.00',
             'description' => 'Gift',
             'image' => $fakeFile
         ];
 
-        $response = $this->json('POST', '/api/checks', $payload);
+        // When we hit the endpoint with an authenticated user
+        $response = $this->be($user)->json('POST', '/api/checks', $payload);
 
+        // Then we check that the data is OK and the file exists
         $response->assertStatus(Response::HTTP_CREATED);
-        $response->assertJsonStructure($this->checkJsonStructure);
         $response->assertJsonFragment($payload);
-
+        $response->assertJsonStructure([
+            'id',
+            'amount',
+            'description',
+            'image_url',
+            'status' => [
+                'id',
+                'name'
+            ]
+        ]);
         Storage::disk()->assertExists('checks/' . $fakeFile->hashName());
+    }
+
+    public function test_checks_can_be_retrieved_from_same_logged_user_and_returns_http_ok()
+    {
+        // Given that we have existing checks from a logged user
+        $count = 5;
+        $user = User::factory()->create();
+        $this->be($user);
+        $existingChecks = Check::factory($count)->create(['user_id' => $user->id]);
+        // Checks from another user to make sure it's filtered correctly
+        Check::factory(2)->create();
+
+        // When we hit the endpoint
+        $response = $this->json('GET', '/api/checks');
+        $responseChecks = collect($response->json('data'));
+
+        // Then we assert the response is as expected
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonCount($count, 'data');
+
+        foreach ($existingChecks as $check) {
+            $filtered = $responseChecks->where('id', '=', $check->id)->first();
+            $this->assertEquals($check->id, $filtered['id']);
+            $this->assertEquals($check->amount, $filtered['amount']);
+            $this->assertEquals($check->description, $filtered['description']);
+            $this->assertEquals($check->image_url, $filtered['image_url']);
+            $this->assertEquals($check->created_at->toDateTimeString(), $filtered['created_at']);
+            $this->assertEquals($check->status->id, $filtered['status']['id']);
+            $this->assertEquals($check->status->name, $filtered['status']['name']);
+        }
+    }
+
+    public function test_checks_can_be_retrieved_using_pagination()
+    {
+        // Given that we have existing checks from a logged user
+        $count = 20;
+        $user = User::factory()->create();
+        $this->be($user);
+        Check::factory($count)->create(['user_id' => $user->id]);
+
+        // When we hit the endpoint requesting items from page #2
+        $response = $this->json('GET', '/api/checks?page=2');
+
+        // Then we assert the response is as expected
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonCount(5, 'data');
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'amount',
+                    'description',
+                    'image_url',
+                    'status' => [
+                        'id',
+                        'name'
+                    ]
+                ]
+            ],
+            'links' => [
+                'first',
+                'last',
+                'prev',
+                'next'
+            ],
+            'meta' => [
+                'current_page',
+                'last_page',
+                'from',
+                'to',
+                'per_page',
+                'total'
+            ]
+        ]);
     }
 }

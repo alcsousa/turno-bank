@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Check extends Model
 {
@@ -20,9 +21,17 @@ class Check extends Model
         'amount' => 'decimal:2',
         'description' => 'string',
         'image_path' => 'string',
-        'is_approved' => 'boolean',
-        'reviewed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(CheckStatus::class, 'check_status_id', 'id');
+    }
+
+    public function getImageUrlAttribute(): string
+    {
+        return asset('storage/' . $this->image_path);
+    }
 }

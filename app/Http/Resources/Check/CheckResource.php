@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Check;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -13,9 +13,9 @@ class CheckResource extends JsonResource
             'id' => $this->id,
             'amount' => $this->amount,
             'description' => $this->description,
-            'image_path' => $this->image_path,
-            'is_approved' => $this->is_approved,
-            'reviewed_at' => $this->reviewed_at
+            'image_url' => $this->image_url,
+            'created_at' => $this->created_at->toDateTimeString(),
+            'status' => new CheckStatusResource($this->status)
         ];
     }
 }

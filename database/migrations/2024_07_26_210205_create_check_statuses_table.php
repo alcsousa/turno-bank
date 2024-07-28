@@ -8,18 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('checks', function (Blueprint $table) {
+        Schema::create('check_statuses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->decimal('amount', '15', '2');
-            $table->string('description');
-            $table->string('image_path');
+            $table->string('name');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('checks');
+        Schema::dropIfExists('check_statuses');
     }
 };

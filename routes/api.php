@@ -9,5 +9,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/checks', [CheckController::class, 'index']);
     Route::post('/checks', [CheckController::class, 'store']);
 });
