@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\Check;
 use App\Models\User;
 use Illuminate\Http\Response;
@@ -13,10 +14,11 @@ class CheckControllerTest extends TestCase
 {
     public function test_a_check_can_be_stored_and_returns_http_created()
     {
-        // Given a valid user and payload
+        // Given a valid customer user with an existing account and payload
         Storage::fake();
         $fakeFile = UploadedFile::fake()->image('test.jpg');
-        $user = User::factory()->create();
+        $user = User::factory()->customer()->create();
+        Account::factory()->create(['user_id' => $user->id]);
         $payload = [
             'amount' => '100.00',
             'description' => 'Gift',
@@ -46,9 +48,10 @@ class CheckControllerTest extends TestCase
     {
         // Given that we have existing checks from a logged user
         $count = 5;
-        $user = User::factory()->create();
+        $user = User::factory()->customer()->create();
+        $account = Account::factory()->create(['user_id' => $user->id]);
         $this->be($user);
-        $existingChecks = Check::factory($count)->create(['user_id' => $user->id]);
+        $existingChecks = Check::factory($count)->create(['account_id' => $account->id]);
         // Checks from another user to make sure it's filtered correctly
         Check::factory(2)->create();
 
@@ -69,6 +72,13 @@ class CheckControllerTest extends TestCase
             $this->assertEquals($check->created_at->toDateTimeString(), $filtered['created_at']);
             $this->assertEquals($check->status->id, $filtered['status']['id']);
             $this->assertEquals($check->status->name, $filtered['status']['name']);
+
+            $this->assertEquals($check->account->id, $filtered['account']['id']);
+            $this->assertEquals($check->account->balance, $filtered['account']['balance']);
+
+            $this->assertEquals($check->account->user->id, $filtered['account']['user']['id']);
+            $this->assertEquals($check->account->user->name, $filtered['account']['user']['name']);
+            $this->assertEquals($check->account->user->email, $filtered['account']['user']['email']);
         }
     }
 
@@ -77,8 +87,9 @@ class CheckControllerTest extends TestCase
         // Given that we have existing checks from a logged user
         $count = 20;
         $user = User::factory()->create();
+        $account = Account::factory()->create(['user_id' => $user->id]);
         $this->be($user);
-        Check::factory($count)->create(['user_id' => $user->id]);
+        Check::factory($count)->create(['account_id' => $account->id]);
 
         // When we hit the endpoint requesting items from page #2
         $response = $this->json('GET', '/api/checks?page=2');
@@ -96,6 +107,15 @@ class CheckControllerTest extends TestCase
                     'status' => [
                         'id',
                         'name'
+                    ],
+                    'account' => [
+                        'id',
+                        'balance',
+                        'user' => [
+                            'id',
+                            'name',
+                            'email'
+                        ]
                     ]
                 ]
             ],

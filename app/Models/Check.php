@@ -11,7 +11,7 @@ class Check extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'account_id',
         'amount',
         'description',
         'image_path'
@@ -28,6 +28,11 @@ class Check extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(CheckStatus::class, 'check_status_id', 'id');
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class, 'account_id', 'id');
     }
 
     public function getImageUrlAttribute(): string

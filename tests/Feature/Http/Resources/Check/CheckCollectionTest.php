@@ -3,8 +3,8 @@
 namespace Tests\Feature\Http\Resources\Check;
 
 use App\Http\Resources\Check\CheckCollection;
+use App\Models\Account;
 use App\Models\Check;
-use App\Models\User;
 use Tests\TestCase;
 
 class CheckCollectionTest extends TestCase
@@ -13,9 +13,9 @@ class CheckCollectionTest extends TestCase
     {
         // Given
         $count = 20;
-        $user = User::factory()->create();
-        Check::factory()->count($count)->create(['user_id' => $user->id]);
-        $paginated = Check::with('status')->where('user_id', $user->id)->paginate();
+        $account = Account::factory()->create();
+        $checks = Check::factory()->count($count)->create(['account_id' => $account->id]);
+        $paginated = Check::with(['status', 'account.user'])->whereIn('id', $checks->pluck('id'))->paginate();
 
         // When we create an instance of CheckCollection
         $checkCollection = new CheckCollection($paginated);

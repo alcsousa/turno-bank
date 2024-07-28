@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Account;
 use App\Models\CheckStatus;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +19,7 @@ class CheckFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory()->create(),
+            'account_id' => Account::factory()->create(),
             'check_status_id' => CheckStatus::PENDING,
             'amount' => $this->faker->numberBetween(1000, 100000),
             'description' => $this->faker->word,

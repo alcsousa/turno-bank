@@ -24,6 +24,15 @@ class CheckResourceTest extends TestCase
                 'status' => [
                     'id' => $check->status->id,
                     'name' => $check->status->name
+                ],
+                'account' => [
+                    'id' => $check->account->id,
+                    'balance' => $check->account->balance,
+                    'user' => [
+                        'id' => $check->account->user->id,
+                        'name' => $check->account->user->name,
+                        'email' => $check->account->user->email
+                    ]
                 ]
             ]
         ), $resource->toJson());

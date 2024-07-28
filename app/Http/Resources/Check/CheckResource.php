@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Check;
 
+use App\Http\Resources\Account\AccountResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,7 +16,8 @@ class CheckResource extends JsonResource
             'description' => $this->description,
             'image_url' => $this->image_url,
             'created_at' => $this->created_at->toDateTimeString(),
-            'status' => new CheckStatusResource($this->status)
+            'status' => new CheckStatusResource($this->status),
+            'account' => new AccountResource($this->account)
         ];
     }
 }

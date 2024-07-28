@@ -13,10 +13,10 @@ class DepositCheckAction
         $imagePath = Storage::putFile('/checks', $checkData['image']);
 
         return Check::create([
-            'user_id' => $user->id,
+            'account_id' => $user->account->id,
             'amount' => $checkData['amount'],
             'description' => $checkData['description'],
             'image_path' => $imagePath
-        ])->load('status')->refresh();
+        ])->load(['status', 'account.user'])->refresh();
     }
 }

@@ -15,8 +15,11 @@ class CheckController extends Controller
 {
     public function index(Request $request)
     {
-        $checks = Check::with('status')
-            ->where('user_id', '=', $request->user()->id)
+        $userId = $request->user()->id;
+        $checks = Check::with(['status', 'account.user'])
+            ->whereHas('account', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
             ->orderBy('id', 'desc')
             ->paginate();
 
