@@ -74,4 +74,15 @@ class CheckControlControllerTest extends TestCase
 
         $response->assertStatus(Response::HTTP_FORBIDDEN);
     }
+
+    public function test_it_retrieves_check_details()
+    {
+        $check = Check::factory()->create();
+        $adminUser = User::factory()->admin()->create();
+        $this->be($adminUser);
+
+        $response = $this->json('GET', "/api/admin/checks/$check->id");
+
+        $response->assertStatus(Response::HTTP_OK);
+    }
 }
