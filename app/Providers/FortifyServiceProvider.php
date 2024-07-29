@@ -36,6 +36,9 @@ class FortifyServiceProvider extends ServiceProvider
         );
     }
 
+    /**
+     * @codeCoverageIgnore
+    */
     public function boot(): void
     {
         Fortify::createUsersUsing(CreateNewUser::class);

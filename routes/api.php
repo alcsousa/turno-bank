@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CheckControlController;
 use App\Http\Controllers\CheckController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,7 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/checks', [CheckController::class, 'index']);
     Route::post('/checks', [CheckController::class, 'store']);
+    Route::post('/purchases', [PurchaseController::class, 'store']);
 });
 
 Route::middleware(['auth:sanctum', EnsureUserIsAdmin::class])->prefix('admin')->group(function () {
