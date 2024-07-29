@@ -4,6 +4,7 @@ namespace App\Services\Transaction;
 
 use App\Models\Account;
 use App\Models\Transaction;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TransactionService implements TransactionServiceContract
 {
@@ -16,5 +17,12 @@ class TransactionService implements TransactionServiceContract
             'amount' => $transactionData['amount'],
             'description' => $transactionData['description']
         ]);
+    }
+
+    public function retrievePaginatedAccountTransactions(Account $account): LengthAwarePaginator
+    {
+        return Transaction::where('account_id', $account->id)
+            ->orderBy('id', 'desc')
+            ->paginate();
     }
 }

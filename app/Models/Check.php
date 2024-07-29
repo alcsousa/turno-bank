@@ -38,7 +38,7 @@ class Check extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return asset('storage' . $this->image_path);
+        return asset('storage/' . $this->image_path);
     }
 
     /**
