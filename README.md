@@ -1,13 +1,13 @@
-# TurnoBank API
+****# TurnoBank API
 
-## Project setup
+## Project setup****
 
 ```shell
 cp .env.example .env
 ```
 
 Important `.env` variables to review
-```env
+```dotenv
 # will be used for the Admin seeder
 USER_ADMIN_EMAIL=admin@test.com
 USER_ADMIN_PASSWORD="your-pass"
@@ -51,7 +51,7 @@ cp .env .env.testing
 ```
 
 Update `.env.testing` values
-```env
+```dotenv
 APP_ENV=testing
 DB_DATABASE=testing
 ```
