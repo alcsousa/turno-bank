@@ -18,7 +18,8 @@ class UserResourceTest extends TestCase
             [
                 'id' => $user->id,
                 'name' => $user->name,
-                'email' => $user->email
+                'email' => $user->email,
+                'is_admin' => $user->is_admin
             ]
         ), $resource->toJson());
     }

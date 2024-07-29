@@ -31,7 +31,8 @@ class CheckResourceTest extends TestCase
                     'user' => [
                         'id' => $check->account->user->id,
                         'name' => $check->account->user->name,
-                        'email' => $check->account->user->email
+                        'email' => $check->account->user->email,
+                        'is_admin' => $check->account->user->is_admin
                     ]
                 ]
             ]
