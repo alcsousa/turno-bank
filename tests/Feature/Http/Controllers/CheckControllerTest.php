@@ -51,12 +51,12 @@ class CheckControllerTest extends TestCase
         $user = User::factory()->customer()->create();
         $account = Account::factory()->create(['user_id' => $user->id]);
         $this->be($user);
-        $existingChecks = Check::factory($count)->create(['account_id' => $account->id]);
+        $existingChecks = Check::factory($count)->pending()->create(['account_id' => $account->id]);
         // Checks from another user to make sure it's filtered correctly
         Check::factory(2)->create();
 
         // When we hit the endpoint
-        $response = $this->json('GET', '/api/checks');
+        $response = $this->json('GET', '/api/checks?status=pending');
         $responseChecks = collect($response->json('data'));
 
         // Then we assert the response is as expected
@@ -89,10 +89,10 @@ class CheckControllerTest extends TestCase
         $user = User::factory()->create();
         $account = Account::factory()->create(['user_id' => $user->id]);
         $this->be($user);
-        Check::factory($count)->create(['account_id' => $account->id]);
+        Check::factory($count)->pending()->create(['account_id' => $account->id]);
 
         // When we hit the endpoint requesting items from page #2
-        $response = $this->json('GET', '/api/checks?page=2');
+        $response = $this->json('GET', '/api/checks?status=pending&page=2');
 
         // Then we assert the response is as expected
         $response->assertStatus(Response::HTTP_OK);

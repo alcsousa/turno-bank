@@ -7,29 +7,33 @@ use App\Models\Check;
 use App\Models\User;
 use App\Services\Transaction\TransactionServiceContract;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CheckService implements CheckServiceContract
 {
-    public function retrievePaginatedChecksByUserId(int $userId): LengthAwarePaginator
+    public function retrievePaginatedChecksByUserIdAndStatusName(int $userId, string $status): LengthAwarePaginator
     {
-        return Check::with(['status', 'account.user'])
+        return $this->getChecksByStatusNameBuilder($status)
             ->whereHas('account', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
-            ->orderBy('id', 'desc')
             ->paginate();
     }
 
-    public function retrievePaginatedChecksByStatusName(string $status): LengthAwarePaginator
+    private function getChecksByStatusNameBuilder(string $status): Builder
     {
         return Check::with(['status', 'account.user'])
             ->whereHas('status', function ($query) use ($status) {
                 $query->where('name', ucfirst($status));
             })
-            ->orderBy('id', 'desc')
-            ->paginate();
+            ->orderBy('id', 'desc');
+    }
+
+    public function retrievePaginatedChecksByStatusName(string $status): LengthAwarePaginator
+    {
+        return $this->getChecksByStatusNameBuilder($status)->paginate();
     }
 
     public function storeUserCheck(User $user, array $checkData): Check

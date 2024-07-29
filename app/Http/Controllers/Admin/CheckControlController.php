@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\InvalidCheckStatusTransitionException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\EvaluateCheckRequest;
-use App\Http\Requests\Admin\IndexCheckByStatusRequest;
+use App\Http\Requests\Check\EvaluateCheckRequest;
+use App\Http\Requests\Check\IndexCheckByStatusRequest;
 use App\Http\Resources\Check\CheckCollection;
 use App\Http\Resources\Check\CheckResource;
 use App\Models\Check;

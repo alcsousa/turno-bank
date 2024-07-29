@@ -29,11 +29,11 @@ class CheckServiceTest extends TestCase
         $count = 5;
         $user = User::factory()->customer()->create();
         $account = Account::factory()->create(['user_id' => $user->id]);
-        $checks = Check::factory($count)->create(['account_id' => $account->id]);
+        $checks = Check::factory($count)->pending()->create(['account_id' => $account->id]);
         // creates checks from another users to make sure it's filtered correctly
         Check::factory(3)->create();
 
-        $paginatedChecks = $this->checkService->retrievePaginatedChecksByUserId($user->id);
+        $paginatedChecks = $this->checkService->retrievePaginatedChecksByUserIdAndStatusName($user->id, 'pending');
 
         $this->assertFactoryChecksAgainstPaginatedChecks($checks, $paginatedChecks);
         $this->assertInstanceOf(LengthAwarePaginator::class, $paginatedChecks);

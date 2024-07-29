@@ -15,7 +15,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', EnsureUserIsCustomer::class])->group(function () {
-    Route::get('/checks', [CheckController::class, 'index']);
+    Route::get('/checks', [CheckController::class, 'indexByStatus']);
     Route::post('/checks', [CheckController::class, 'store']);
     Route::post('/purchases', [PurchaseController::class, 'store']);
     Route::get('/transactions', [TransactionController::class, 'index']);

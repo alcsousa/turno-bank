@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Check\IndexCheckByStatusRequest;
 use App\Http\Requests\Check\StoreCheckRequest;
 use App\Http\Resources\Check\CheckCollection;
 use App\Http\Resources\Check\CheckResource;
 use App\Services\Check\CheckServiceContract;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CheckController extends Controller
@@ -17,9 +17,12 @@ class CheckController extends Controller
     ) {
     }
 
-    public function index(Request $request): JsonResponse
+    public function indexByStatus(IndexCheckByStatusRequest $request): JsonResponse
     {
-        $paginatedChecks = $this->service->retrievePaginatedChecksByUserId($request->user()->id);
+        $paginatedChecks = $this->service->retrievePaginatedChecksByUserIdAndStatusName(
+            $request->user()->id,
+            $request->get('status')
+        );
 
         return response()->json(new CheckCollection($paginatedChecks), Response::HTTP_OK);
     }
