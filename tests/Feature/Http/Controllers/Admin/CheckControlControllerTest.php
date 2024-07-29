@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Http\Controllers\Admin;
 
+use App\Exceptions\InvalidCheckStatusTransitionException;
 use App\Models\Check;
 use App\Models\CheckStatus;
 use App\Models\User;
@@ -84,5 +85,47 @@ class CheckControlControllerTest extends TestCase
         $response = $this->json('GET', "/api/admin/checks/$check->id");
 
         $response->assertStatus(Response::HTTP_OK);
+    }
+
+    public function test_it_evaluates_check_as_approved_and_returns_http_ok()
+    {
+        $check = Check::factory()->create();
+        $adminUser = User::factory()->admin()->create();
+        $this->be($adminUser);
+
+        $response = $this->json('POST', "/api/admin/checks/$check->id/evaluate", [
+            'is_accepted' => true
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonPath('status.id', CheckStatus::ACCEPTED);
+    }
+
+    public function test_it_evaluates_check_as_rejected_and_returns_http_ok()
+    {
+        $check = Check::factory()->create();
+        $adminUser = User::factory()->admin()->create();
+        $this->be($adminUser);
+
+        $response = $this->json('POST', "/api/admin/checks/$check->id/evaluate", [
+            'is_accepted' => false
+        ]);
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonPath('status.id', CheckStatus::REJECTED);
+    }
+
+    public function test_it_get_exception_when_tries_to_evaluate_check_already_evaluated()
+    {
+        $check = Check::factory()->accepted()->create();
+        $adminUser = User::factory()->admin()->create();
+        $this->be($adminUser);
+
+        $response = $this->json('POST', "/api/admin/checks/$check->id/evaluate", [
+            'is_accepted' => true
+        ]);
+
+        $response->assertStatus(Response::HTTP_BAD_REQUEST);
+        $response->assertJsonPath('message', (new InvalidCheckStatusTransitionException)->getMessage());
     }
 }

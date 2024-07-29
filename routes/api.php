@@ -18,4 +18,5 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', EnsureUserIsAdmin::class])->prefix('admin')->group(function () {
     Route::get('/checks', [CheckControlController::class, 'indexByStatus']);
     Route::get('/checks/{check}', [CheckControlController::class, 'show']);
+    Route::post('/checks/{check}/evaluate', [CheckControlController::class, 'evaluateCheck']);
 });
