@@ -42,4 +42,9 @@ class User extends Authenticatable
     {
         return $this->is_admin;
     }
+
+    public function isCustomer(): bool
+    {
+        return !$this->isAdmin();
+    }
 }
