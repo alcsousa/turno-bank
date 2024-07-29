@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\InvalidCheckStatusTransitionException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,5 +39,25 @@ class Check extends Model
     public function getImageUrlAttribute(): string
     {
         return asset('storage' . $this->image_path);
+    }
+
+    /**
+     * @throws InvalidCheckStatusTransitionException
+     */
+    public function markAsAccepted(): void
+    {
+        CheckStatus::ensureValidStatusTransition($this);
+        $this->check_status_id = CheckStatus::ACCEPTED;
+        $this->save();
+    }
+
+    /**
+     * @throws InvalidCheckStatusTransitionException
+     */
+    public function markAsRejected(): void
+    {
+        CheckStatus::ensureValidStatusTransition($this);
+        $this->check_status_id = CheckStatus::REJECTED;
+        $this->save();
     }
 }

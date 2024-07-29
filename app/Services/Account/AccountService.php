@@ -21,4 +21,10 @@ class AccountService implements AccountServiceContract
 
         return $account;
     }
+
+    public function addAmountToCurrentBalance(Account $account, float $amount): void
+    {
+        $account->balance += $amount;
+        $account->save();
+    }
 }

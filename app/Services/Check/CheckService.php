@@ -2,9 +2,12 @@
 
 namespace App\Services\Check;
 
+use App\Exceptions\InvalidCheckStatusTransitionException;
 use App\Models\Check;
 use App\Models\User;
+use App\Services\Transaction\TransactionServiceContract;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CheckService implements CheckServiceContract
@@ -39,5 +42,28 @@ class CheckService implements CheckServiceContract
             'description' => $checkData['description'],
             'image_path' => $imagePath
         ])->load(['status', 'account.user'])->refresh();
+    }
+
+    /**
+     * @throws InvalidCheckStatusTransitionException
+     */
+    public function evaluateCheck(Check $check, bool $isAccepted): void
+    {
+        if ($isAccepted) {
+            DB::transaction(function () use ($check) {
+                app(TransactionServiceContract::class)
+                    ->createAccountTransaction($check->account, [
+                        'amount' => $check->amount,
+                        'description' => $check->description
+                    ]);
+
+                $check->account->balance = $check->account->balance + $check->amount;
+                $check->account->save();
+
+                $check->markAsAccepted();
+            });
+        } else {
+            $check->markAsRejected();
+        }
     }
 }

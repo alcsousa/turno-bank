@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Services\Check;
 
+use App\Exceptions\InvalidCheckStatusTransitionException;
 use App\Models\Account;
 use App\Models\Check;
+use App\Models\CheckStatus;
 use App\Models\User;
 use App\Services\Check\CheckServiceContract;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -94,5 +96,51 @@ class CheckServiceTest extends TestCase
         $this->assertEquals($checkData['description'], $check->description);
         $this->assertEquals('checks/' . $fakeFile->hashName(), $check->image_path);
         Storage::disk()->assertExists('checks/' . $fakeFile->hashName());
+    }
+
+    public function test_transaction_is_created_and_account_balance_updated_when_check_is_accepted()
+    {
+        $initialBalance = 1000;
+        $checkAmount = 500;
+        $account = Account::factory()->create(['balance' => $initialBalance]);
+        $check = Check::factory()->pending()->create(['account_id' => $account->id, 'amount' => $checkAmount]);
+
+        $this->checkService->evaluateCheck($check, true);
+
+        $this->assertEquals(($initialBalance + $checkAmount), $account->fresh()->balance);
+        $this->assertEquals(CheckStatus::ACCEPTED, $check->fresh()->status->id);
+        $this->assertDatabaseHas('transactions', [
+            'account_id' => $account->id,
+            'amount' => $check->amount,
+            'description' => $check->description
+        ]);
+    }
+
+    public function test_transaction_is_not_created_and_account_balance_not_updated_when_check_is_rejected()
+    {
+        $initialBalance = 1000;
+        $checkAmount = 500;
+        $account = Account::factory()->create(['balance' => $initialBalance]);
+        $check = Check::factory()->pending()->create(['account_id' => $account->id, 'amount' => $checkAmount]);
+
+        $this->checkService->evaluateCheck($check, false);
+
+        $this->assertEquals($initialBalance, $account->fresh()->balance);
+        $this->assertEquals(CheckStatus::REJECTED, $check->fresh()->status->id);
+        $this->assertDatabaseMissing('transactions', [
+            'account_id' => $account->id,
+            'amount' => $check->amount,
+            'description' => $check->description
+        ]);
+    }
+
+    public function test_it_throws_exception_for_invalid_status_changes()
+    {
+        $account = Account::factory()->create();
+        $check = Check::factory()->accepted()->create(['account_id' => $account->id]);
+
+        $this->expectException(InvalidCheckStatusTransitionException::class);
+
+        $this->checkService->evaluateCheck($check, true);
     }
 }

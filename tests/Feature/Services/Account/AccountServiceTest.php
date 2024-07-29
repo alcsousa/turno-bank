@@ -3,8 +3,10 @@
 namespace Tests\Feature\Services\Account;
 
 use App\Exceptions\ShouldNotCreateAccountForAdminUserException;
+use App\Models\Account;
 use App\Models\User;
 use App\Services\Account\AccountServiceContract;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AccountServiceTest extends TestCase
@@ -37,5 +39,26 @@ class AccountServiceTest extends TestCase
         $this->assertDatabaseMissing('accounts', [
             'user_id' => $user->id
         ]);
+    }
+
+    #[DataProvider('initialBalanceAndAddedAmountProvider')]
+    public function test_it_updates_account_balance_from_given_amount($initialBalance, $addedAmount, $expectedBalance)
+    {
+        $account = Account::factory()->create(['balance' => $initialBalance]);
+
+        $this->accountService->addAmountToCurrentBalance($account, $addedAmount);
+
+        $this->assertEquals($expectedBalance, $account->fresh()->balance);
+    }
+
+    public static function initialBalanceAndAddedAmountProvider(): array
+    {
+        return [
+            [0, 500, 500],
+            [1000, 500, 1500],
+            [1000, -500, 500],
+            [-500, 500, 0],
+            [-500, 1000, 500]
+        ];
     }
 }

@@ -11,4 +11,5 @@ interface CheckServiceContract
     public function retrievePaginatedChecksByUserId(int $userId): LengthAwarePaginator;
     public function retrievePaginatedChecksByStatusName(string $status): LengthAwarePaginator;
     public function storeUserCheck(User $user, array $checkData): Check;
+    public function evaluateCheck(Check $check, bool $isAccepted): void;
 }
