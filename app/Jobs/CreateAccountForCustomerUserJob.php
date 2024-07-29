@@ -2,9 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Exceptions\ShouldNotCreateAccountForAdminUserException;
-use App\Models\Account;
 use App\Models\User;
+use App\Services\Account\AccountServiceContract;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
@@ -17,18 +16,8 @@ class CreateAccountForCustomerUserJob implements ShouldQueue
     ) {
     }
 
-    /**
-     * @throws ShouldNotCreateAccountForAdminUserException
-     */
-    public function handle(): void
+    public function handle(AccountServiceContract $service): void
     {
-        if ($this->user->is_admin) {
-            throw new ShouldNotCreateAccountForAdminUserException();
-        }
-
-        $account = new Account();
-        $account->user_id = $this->user->id;
-        $account->balance = 0;
-        $account->save();
+        $service->createNewAccount($this->user);
     }
 }

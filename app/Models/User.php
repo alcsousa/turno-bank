@@ -37,4 +37,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Account::class);
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->is_admin;
+    }
 }

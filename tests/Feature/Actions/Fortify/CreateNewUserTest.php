@@ -33,7 +33,7 @@ class CreateNewUserTest extends TestCase
 
         $user = (new CreateNewUser())->create($userData);
 
-        $this->assertEquals(false, $user->refresh()->is_admin);
+        $this->assertEquals(false, $user->refresh()->isAdmin());
         $this->assertDatabaseHas('accounts', [
             'user_id' => $user->id,
             'balance' => 0
